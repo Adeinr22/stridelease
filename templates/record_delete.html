@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ singular }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'records' kind %}">{{ title }}</a> / Delete{% endblock %}
+{% block content %}
+<div class="page-heading records-heading"><div><p class="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Delete {{ singular }}</h1><p class="heading-subtitle">Review before removing this record.</p></div></div>
+<section class="panel delete-panel">
+  <div class="delete-symbol">!</div><h2>Delete “{{ record }}”?</h2>
+  <p>This action can’t be undone. Records with linked activity can’t be deleted.</p>
+  <form method="post" class="form-actions">{% csrf_token %}<a class="button button-secondary" href="{% url 'records' kind %}">Cancel</a><button class="button button-danger" type="submit">Delete {{ singular }}</button></form>
+</section>
+{% endblock %}

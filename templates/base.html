@@ -1,0 +1,76 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f172a">
+  <title>{% block title %}Stridelease{% endblock %} · Stridelease</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'core/style.css' %}">
+  <script src="{% static 'core/app.js' %}" defer></script>
+</head>
+<body>
+{% if user.is_authenticated %}
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'dashboard' %}" aria-label="Stridelease home">
+      <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 22.5 13.2 14l5.2 5.2L27 9.5M18.5 9.5H27V18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="brand-name">stride<span>lease</span></span>
+    </a>
+    <div class="workspace-label">WORKSPACE</div>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg><span>Overview</span>
+      </a>
+      <a class="nav-link {% if active_page == 'properties' or active_page == 'units' %}active{% endif %}" href="{% url 'records' 'properties' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 10h.01M15 10h.01M9 14h.01M15 14h.01M10 21v-4h4v4"/></svg><span>Portfolio &amp; units</span>
+      </a>
+      <a class="nav-link {% if active_page == 'leases' %}active{% endif %}" href="{% url 'records' 'leases' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg><span>Lease directory</span>
+      </a>
+      <a class="nav-link {% if active_page == 'tenants' %}active{% endif %}" href="{% url 'records' 'tenants' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 5.3a3.5 3.5 0 0 1 0 6.4M18 14a5.8 5.8 0 0 1 3.5 5.3"/></svg><span>Tenants</span>
+      </a>
+      <a class="nav-link {% if active_page == 'payments' %}active{% endif %}" href="{% url 'records' 'payments' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg><span>Cash flow</span>
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="help-card"><span class="help-icon">?</span><div><strong>Need a hand?</strong><small>Explore your workspace</small></div><span class="help-arrow">↗</span></div>
+      <div class="profile">
+        <div class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</div>
+        <div class="profile-copy"><strong>{{ user.get_full_name|default:user.username }}</strong><small>Property manager</small></div>
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="switch-account-button" type="submit" title="Sign out and return to the sign-in page">Switch account ↗</button></form>
+      </div>
+    </div>
+  </aside>
+  <main class="main-area">
+    <header class="topbar">
+      <button class="menu-toggle" data-menu-toggle aria-label="Toggle navigation">☰</button>
+      <div class="breadcrumbs"><span>Workspace</span><span class="crumb-slash">/</span><strong>{% block breadcrumb %}Overview{% endblock %}</strong></div>
+      <div class="topbar-right">
+        <span class="topbar-date">{% now "D, M j" %}</span>
+        <div class="notification-control">
+          <button class="icon-button notification-button" type="button" aria-label="Notifications" aria-expanded="false" aria-controls="notification-panel" data-notifications-url="{% url 'notifications' %}"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i class="notification-indicator" hidden></i></button>
+          <section class="notification-popover" id="notification-panel" aria-label="Notifications" hidden>
+            <div class="notification-heading"><div><h2>Notifications</h2><p>Updates for your portfolio</p></div><button type="button" class="notification-close" data-notifications-close aria-label="Close notifications">×</button></div>
+            <div class="notification-list" data-notification-list aria-live="polite"><p class="notification-state">Loading notifications…</p></div>
+          </section>
+        </div>
+        <form method="post" action="{% url 'logout' %}" class="account-switch-form">{% csrf_token %}<button class="topbar-avatar account-switch-avatar" type="submit" aria-label="Switch account and sign out" title="Switch account / sign out">{{ user.first_name|default:user.username|slice:":1"|upper }}</button></form>
+      </div>
+    </header>
+    <section class="page-content">
+      {% if messages %}<div class="messages">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+</div>
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+</body>
+</html>

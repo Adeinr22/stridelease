@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-heading records-heading"><div><p class="eyebrow">PORTFOLIO MANAGEMENT</p><h1>{{ title }}</h1><p class="heading-subtitle">Manage your {{ title|lower }} and keep your workspace up to date.</p></div></div>
+{% if kind == "properties" or kind == "units" %}<nav class="record-tabs" aria-label="Portfolio records"><a class="{% if kind == 'properties' %}selected{% endif %}" href="{% url 'records' 'properties' %}">Properties</a><a class="{% if kind == 'units' %}selected{% endif %}" href="{% url 'records' 'units' %}">Units</a></nav>{% endif %}
+<div class="records-layout">
+  <section class="panel records-panel">
+    <div class="panel-heading"><div><h2>All {{ title|lower }}</h2><p>{{ items|length }} record{{ items|length|pluralize }} shown</p></div></div>
+    <div class="table-scroll"><table class="data-table records-table">
+      {% if kind == "properties" %}<thead><tr><th>PROPERTY</th><th>ADDRESS</th><th>UNITS</th><th></th></tr></thead><tbody>{% for item in items %}<tr><td><strong>{{ item.name }}</strong></td><td>{{ item.address }}</td><td>{{ item.units.count }}</td><td class="row-actions"><a href="{% url 'edit_record' kind item.pk %}">Edit</a><a href="{% url 'delete_record' kind item.pk %}">Delete</a></td></tr>{% empty %}<tr><td colspan="4" class="muted">No properties yet.</td></tr>{% endfor %}
+      {% elif kind == "units" %}<thead><tr><th>UNIT</th><th>PROPERTY</th><th>SIZE</th><th>STATUS</th><th></th></tr></thead><tbody>{% for item in items %}<tr><td><strong>{{ item.unit_number }}</strong></td><td>{{ item.property.name }}</td><td>{{ item.sq_ft|intcomma }} sq ft</td><td><span class="status-pill status-{{ item.status|lower }}">{{ item.get_status_display }}</span></td><td class="row-actions"><a href="{% url 'edit_record' kind item.pk %}">Edit</a><a href="{% url 'delete_record' kind item.pk %}">Delete</a></td></tr>{% empty %}<tr><td colspan="5" class="muted">No units yet.</td></tr>{% endfor %}
+      {% elif kind == "tenants" %}<thead><tr><th>COMPANY</th><th>CONTACT</th><th>EMAIL</th><th>PHONE</th><th></th></tr></thead><tbody>{% for item in items %}<tr><td><strong>{{ item.company_name }}</strong></td><td>{{ item.contact_name|default:"—" }}</td><td>{{ item.email|default:"—" }}</td><td>{{ item.phone|default:"—" }}</td><td class="row-actions"><a href="{% url 'edit_record' kind item.pk %}">Edit</a><a href="{% url 'delete_record' kind item.pk %}">Delete</a></td></tr>{% empty %}<tr><td colspan="5" class="muted">No tenants yet.</td></tr>{% endfor %}
+      {% elif kind == "leases" %}<thead><tr><th>TENANT</th><th>PROPERTY / UNIT</th><th>END DATE</th><th>STATUS</th><th class="align-right">MONTHLY RENT</th><th>ACTIONS</th></tr></thead><tbody>{% for item in items %}<tr><td><strong>{{ item.tenant.company_name }}</strong></td><td>{{ item.unit.property.name }} · {{ item.unit.unit_number }}</td><td>{{ item.end_date|date:"M j, Y" }}</td><td><span class="status-pill status-{{ item.status|lower }}">{{ item.get_status_display }}</span></td><td class="align-right">${{ item.monthly_rent|floatformat:2 }}</td><td class="row-actions"><a href="{% url 'edit_record' kind item.pk %}">Edit</a><a href="{% url 'delete_record' kind item.pk %}">Delete</a><form method="post" action="{% url 'queue_renewal' item.pk %}">{% csrf_token %}<button class="small-action" type="submit">Queue reminder</button></form></td></tr>{% empty %}<tr><td colspan="6" class="muted">No leases yet.</td></tr>{% endfor %}
+      {% else %}<thead><tr><th>TENANT</th><th>PROPERTY / UNIT</th><th>DATE</th><th>STATUS</th><th class="align-right">AMOUNT</th></tr></thead><tbody>{% for item in items %}<tr><td><strong>{{ item.lease.tenant.company_name }}</strong></td><td>{{ item.lease.unit.property.name }} · {{ item.lease.unit.unit_number }}</td><td>{{ item.payment_date|date:"M j, Y" }}</td><td><span class="status-pill status-{{ item.status|lower }}">{{ item.get_status_display }}</span></td><td class="align-right">${{ item.amount|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="5" class="muted">No payments yet.</td></tr>{% endfor %}{% endif %}
+      </tbody>
+    </table></div>
+  </section>
+  <aside class="panel form-panel"><div class="panel-heading"><div><h2>Add {{ singular }}</h2><p>Enter the details below to create a record.</p></div></div>
+    <form method="post" class="record-form">{% csrf_token %}
+      {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required-mark">*</span>{% endif %}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+      {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+      <button class="button button-primary full-button" type="submit">Save {{ singular }}</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ singular }}{% endblock %}
+{% block breadcrumb %}<a href="{% url 'records' kind %}">{{ title }}</a> / Edit{% endblock %}
+{% block content %}
+<div class="page-heading records-heading"><div><p class="eyebrow">PORTFOLIO MANAGEMENT</p><h1>Edit {{ singular }}</h1><p class="heading-subtitle">Update this record’s details.</p></div></div>
+<section class="panel edit-panel">
+  <form method="post" class="record-form">{% csrf_token %}
+    {% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="required-mark">*</span>{% endif %}</label>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small class="field-error">{{ error }}</small>{% endfor %}</div>{% endfor %}
+    {% if form.non_field_errors %}<div class="field-error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-actions"><a class="button button-secondary" href="{% url 'records' kind %}">Cancel</a><button class="button button-primary" type="submit">Save changes</button></div>
+  </form>
+</section>
+{% endblock %}
